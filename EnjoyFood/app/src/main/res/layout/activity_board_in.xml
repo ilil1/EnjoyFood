@@ -3,72 +3,116 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        tools:context=".board.BoardInActivity">
+        android:layout_height="match_parent">
 
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="60dp">
+            android:layout_height="match_parent">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                tools:context=".board.BoardInActivity">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <TextView
+                            android:id="@+id/titleText"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginLeft="50dp"
+                            android:layout_marginRight="50dp"
+                            android:gravity="center"
+                            android:text="title"
+                            android:textColor="@color/black"
+                            android:textSize="25sp"
+                            android:textStyle="bold" />
+
+                        <ImageView
+                            android:id="@+id/boardInmenu"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_margin="10dp"
+                            android:src="@drawable/menu"
+                            android:visibility="invisible"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:background="@color/black"></LinearLayout>
 
                 <TextView
-                    android:id="@+id/titleText"
+                    android:id="@+id/timeText"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="50dp"
-                    android:layout_marginRight="50dp"
-                    android:gravity="center"
-                    android:text="title"
-                    android:textColor="@color/black"
-                    android:textSize="25sp"
-                    android:textStyle="bold" />
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:gravity="right"
+                    android:text="time" />
+
+                <TextView
+                    android:id="@+id/contentText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="20dp"
+                    android:padding="10dp"
+                    android:text="내용"
+                    android:textColor="@color/black" />
 
                 <ImageView
-                    android:id="@+id/boardInmenu"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_margin="10dp"
-                    android:src="@drawable/menu"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                     />
+                    android:id="@+id/imageArea"
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp"
+                    android:layout_margin="10dp" />
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:background="@color/black"></LinearLayout>
+
+                <ListView
+                    android:id="@+id/commentListView"
+                    android:layout_width="match_parent"
+                    android:layout_height="600dp" />
+
+            </LinearLayout>
+        </ScrollView>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="0.5dp"
-            android:background="@color/black"></LinearLayout>
+            android:layout_alignParentBottom="true"
+            android:background="@color/white"
+            android:layout_height="60dp"
+            >
 
-        <TextView
-            android:id="@+id/timeText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:gravity="right"
-            android:text="time" />
+            <EditText
+                android:id="@+id/commentText"
+                android:hint="댓글을 입력해주세요"
+                android:layout_width="360dp"
+                android:layout_marginLeft="10dp"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                />
 
-        <TextView
-            android:id="@+id/contentText"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_margin="20dp"
-            android:padding="10dp"
-            android:text="내용"
-            android:textColor="@color/black" />
+            <ImageView
+                android:id="@+id/commentBtn"
+                android:layout_width="60dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/writebtn" />
 
-        <ImageView
-            android:id="@+id/imageArea"
-            android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:layout_margin="10dp" />
-
-    </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
 </layout>

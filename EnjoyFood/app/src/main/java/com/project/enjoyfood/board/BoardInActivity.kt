@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import com.bumptech.glide.Glide
 import com.google.android.gms.tasks.OnCompleteListener
@@ -17,13 +18,21 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import com.project.enjoyfood.R
+import com.project.enjoyfood.comment.CommentData
+import com.project.enjoyfood.comment.CommentListAdapter
 import com.project.enjoyfood.databinding.ActivityBoardInBinding
+import com.project.enjoyfood.firebase.Auth
 import com.project.enjoyfood.firebase.Ref
 
 class BoardInActivity : AppCompatActivity() {
 
     private lateinit var binding : ActivityBoardInBinding
     private lateinit var key:String
+
+    private val commentList = mutableListOf<CommentData>()
+    private lateinit var commentAdapter : CommentListAdapter
+    private val boardKeyList = mutableListOf<String>()
+
     private val TAG = BoardInActivity::class.java.simpleName
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,6 +48,55 @@ class BoardInActivity : AppCompatActivity() {
 
         getBoardData(key)
         getImageData(key)
+
+        binding.commentBtn.setOnClickListener {
+            insertComment()
+        }
+        getCommentData(key)
+
+        commentAdapter = CommentListAdapter(commentList)
+        binding.commentListView.adapter = commentAdapter
+
+    }
+    fun getCommentData(key : String){
+        val postListener = object : ValueEventListener {
+
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+
+                commentList.clear()
+
+                for(dataModel in dataSnapshot.children) {
+
+                    val item = dataModel.getValue(CommentData::class.java)
+                    commentList.add(item!!)
+                    boardKeyList.add(dataModel.key.toString())
+                }
+
+                commentAdapter.notifyDataSetChanged()
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+
+                Log.d(TAG,"ladPost:onCancelled",error.toException())
+
+            }
+        }
+        Ref.commentRef.child(key).addValueEventListener(postListener)
+    }
+    fun insertComment() {
+        //comment
+        // -BoardKey
+        //   -CommentKey
+        //      -CommentData
+        Ref.commentRef
+            .child(key)
+            .push()
+            .setValue(CommentData(
+                binding.commentText.text.toString(),
+                Auth.getTime()
+            ))
+        Toast.makeText(this,"댓글 입력 완료",Toast.LENGTH_LONG).show()
+        binding.commentText.setText("")
     }
     private fun showDialog() {
 
@@ -72,7 +130,7 @@ class BoardInActivity : AppCompatActivity() {
                     .load(task.result)
                     .into(imageView)
             } else {
-
+                binding.imageArea.isVisible = false
             }
         })
     }
@@ -86,6 +144,13 @@ class BoardInActivity : AppCompatActivity() {
                     binding.titleText.text = dataModel!!.title
                     binding.contentText.text = dataModel!!.content
                     binding.timeText.text = dataModel!!.time
+
+                    val myUid = Auth.getUid()
+                    val writerUid = dataModel.uid
+
+                    if(myUid.equals(writerUid)) {
+                        binding.boardInmenu.isVisible = true
+                    }
 
                 } catch (e : Exception) {
                     Log.d(TAG,"삭제 완료")

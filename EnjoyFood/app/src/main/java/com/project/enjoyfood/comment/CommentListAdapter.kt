@@ -1,4 +1,4 @@
-package com.project.enjoyfood.board
+package com.project.enjoyfood.comment
 
 import android.view.LayoutInflater
 import android.view.View
@@ -7,36 +7,30 @@ import android.widget.BaseAdapter
 import android.widget.TextView
 import com.project.enjoyfood.R
 
-class BoardListAdapter(val boardList : MutableList<BoardData>) : BaseAdapter() {
-
+class CommentListAdapter(val commentList : MutableList<CommentData>) : BaseAdapter() {
     override fun getCount(): Int {
-        return boardList.size
+        return commentList.size
     }
 
     override fun getItem(position: Int): Any {
-        return boardList[position]
+        return commentList[position]
     }
 
     override fun getItemId(position: Int): Long {
         return position.toLong()
     }
-
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-
         var view =convertView
 
         if(view == null) {
-            view = LayoutInflater.from(parent?.context).inflate(R.layout.board_list, parent,false)
-
+            view = LayoutInflater.from(parent?.context).inflate(R.layout.comment_list, parent, false)
         }
 
-        val title = view?.findViewById<TextView>(R.id.titleText)
-        val content = view?.findViewById<TextView>(R.id.contentText)
+        val title = view?.findViewById<TextView>(R.id.commentText)
         val time = view?.findViewById<TextView>(R.id.timeText)
 
-        title!!.text = boardList[position].title
-        content!!.text = boardList[position].content
-        time!!.text = boardList[position].time
+        title!!.text = commentList[position].comment
+        time!!.text = commentList[position].time
 
         return view!!
     }

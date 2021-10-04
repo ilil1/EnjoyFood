@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
+import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -14,6 +15,7 @@ import com.project.enjoyfood.fragments.HomeFragment
 import com.project.enjoyfood.fragments.TalkFragment
 import com.project.enjoyfood.fragments.accountFragment
 import com.project.enjoyfood.fragments.searchFragment
+import com.project.enjoyfood.setting.SettingActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,6 +26,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_main)
+
+        findViewById<ImageView>(R.id.menuBtn).setOnClickListener {
+            val intent = Intent(this, SettingActivity::class.java)
+            startActivity(intent)
+        }
 
         val homeFragment = HomeFragment()
         val TalkFragment = TalkFragment()
