@@ -116,6 +116,7 @@ class BoardInActivity : AppCompatActivity() {
         }
         alertDialog.findViewById<Button>(R.id.removeBtn)?.setOnClickListener {
             Ref.boardRef.child(key).removeValue()
+            Ref.storageRef.child(key + ".png").delete()
             Toast.makeText(this,"게시글이 삭제되었습니다.",Toast.LENGTH_SHORT).show()
             finish()
         }

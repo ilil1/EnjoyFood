@@ -1,8 +1,11 @@
 package com.project.enjoyfood.board
 
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
@@ -18,6 +21,7 @@ import com.project.enjoyfood.databinding.ActivityBoardEditBinding
 import com.project.enjoyfood.databinding.ActivityBoardInBinding
 import com.project.enjoyfood.firebase.Auth
 import com.project.enjoyfood.firebase.Ref
+import java.io.ByteArrayOutputStream
 
 class BoardEditActivity : AppCompatActivity() {
 
@@ -25,6 +29,7 @@ class BoardEditActivity : AppCompatActivity() {
     private lateinit var binding : ActivityBoardEditBinding
     private val TAG = BoardEditActivity::class.java.simpleName
     private lateinit var writerUid : String
+    private var isImageUpload = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,6 +40,12 @@ class BoardEditActivity : AppCompatActivity() {
 
         getBoardData(key)
         getImageData(key)
+
+        binding.imageArea.setOnClickListener {
+            val gallery = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI)
+            startActivityForResult(gallery, 100)
+            isImageUpload = true
+        }
 
         binding.editBtn.setOnClickListener {
 
@@ -47,6 +58,9 @@ class BoardEditActivity : AppCompatActivity() {
                 .child(key).setValue(BoardData(title, content, uid, time, key))
 
             Toast.makeText(this,"수정완료",Toast.LENGTH_LONG).show()
+
+            imageUpload(key)
+
             finish()
         }
     }
@@ -66,6 +80,39 @@ class BoardEditActivity : AppCompatActivity() {
 
             }
         })
+    }
+    private fun imageUpload(key : String) {
+        val storage = Firebase.storage
+        val storageRef = storage.reference
+        val mountainsRef = storageRef.child(key + ".png")
+
+        val imageView = binding.imageArea
+        // Get the data from an ImageView as bytes
+        imageView.isDrawingCacheEnabled = true
+        imageView.buildDrawingCache()
+        val bitmap = (imageView.drawable as BitmapDrawable).bitmap
+        val baos = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+        val data = baos.toByteArray()
+
+        Ref.storageRef.child(key + ".png").delete()
+        var uploadTask = mountainsRef.putBytes(data)
+
+        uploadTask.addOnFailureListener {
+            // Handle unsuccessful uploads
+
+        }.addOnSuccessListener { taskSnapshot ->
+            // taskSnapshot.metadata contains file metadata such as size, content-type, etc.
+            // ...
+        }
+    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if(resultCode == RESULT_OK && requestCode == 100) {
+            binding.imageArea.setImageURI(data?.data)
+            Toast.makeText(this,"이미지가 업로드 되었습니다.",Toast.LENGTH_LONG).show()
+        }
     }
     private fun getBoardData(key : String) {
 
@@ -90,5 +137,4 @@ class BoardEditActivity : AppCompatActivity() {
         }
         Ref.boardRef.child(key).addValueEventListener(postListener)
     }
-
 }

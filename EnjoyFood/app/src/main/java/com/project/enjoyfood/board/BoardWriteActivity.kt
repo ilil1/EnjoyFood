@@ -30,7 +30,6 @@ import com.project.enjoyfood.R
 import com.project.enjoyfood.databinding.ActivityBoardWriteBinding
 import com.project.enjoyfood.firebase.Auth
 import com.project.enjoyfood.firebase.Ref
-import com.project.enjoyfood.firebase.Ref.Companion.DB_ARTICLES
 import com.project.enjoyfood.firebase.Ref.Companion.boardRef
 import java.io.ByteArrayOutputStream
 
@@ -70,9 +69,9 @@ class BoardWriteActivity : AppCompatActivity() {
         }
     }
     private fun imageUpload(key : String) {
-        val storage = Firebase.storage
-        val storageRef = storage.reference
-        val mountainsRef = storageRef.child(key + ".png")
+//        val storage = Firebase.storage
+//        val storageRef = storage.reference
+        val mountainsRef = Ref.storageRef.child(key + ".png")
 
         val imageView = binding.imageArea
         // Get the data from an ImageView as bytes
@@ -96,6 +95,7 @@ class BoardWriteActivity : AppCompatActivity() {
 
             if(resultCode == RESULT_OK && requestCode == 100) {
                 binding.imageArea.setImageURI(data?.data)
+                Toast.makeText(this,"이미지가 업로드 되었습니다.",Toast.LENGTH_LONG).show()
             }
 
     }

@@ -28,7 +28,6 @@ class TalkFragment : Fragment(R.layout.fragment_talk) {
     private lateinit var boardListAdapter : BoardListAdapter
 
     private val boardList = mutableListOf<BoardData>()
-    private val boardKeyList = mutableListOf<String>()
 
     private val TAG = TalkFragment::class.java.simpleName
 
@@ -38,6 +37,7 @@ class TalkFragment : Fragment(R.layout.fragment_talk) {
             BoardData ?: return
             boardList.add(BoardData)
             boardListAdapter.notifyDataSetChanged()
+
             boardListAdapter.submitList(boardList)
         }
         override fun onChildChanged(dataSnapshot: DataSnapshot, previousChildName: String?) {
