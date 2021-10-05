@@ -9,10 +9,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
-import androidx.navigation.findNavController
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.firebase.database.*
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import com.project.enjoyfood.R
 import com.project.enjoyfood.board.BoardData
 import com.project.enjoyfood.board.BoardInActivity
@@ -21,72 +21,58 @@ import com.project.enjoyfood.board.BoardWriteActivity
 import com.project.enjoyfood.databinding.FragmentTalkBinding
 import com.project.enjoyfood.firebase.Ref
 
-class TalkFragment : Fragment() {
 
-    private lateinit var binding : FragmentTalkBinding
+class TalkFragment : Fragment(R.layout.fragment_talk) {
+
+    private var binding : FragmentTalkBinding? = null
+    private lateinit var boardListAdapter : BoardListAdapter
 
     private val boardList = mutableListOf<BoardData>()
     private val boardKeyList = mutableListOf<String>()
 
     private val TAG = TalkFragment::class.java.simpleName
 
-    private lateinit var boardListAdapter : BoardListAdapter
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-
-        binding = DataBindingUtil.inflate(inflater,R.layout.fragment_talk, container, false)
-
-        boardListAdapter = BoardListAdapter(boardList)
-        binding.boardList.adapter = boardListAdapter
-
-        binding.boardList.setOnItemClickListener { parent, view, position, id ->
-
-            val intent = Intent(context, BoardInActivity::class.java)
-            intent.putExtra("key", boardKeyList[position])
-            startActivity(intent)
+    private var listener = object: ChildEventListener {
+        override fun onChildAdded(dataSnapshot: DataSnapshot, previousChildName: String?) {
+            val BoardData = dataSnapshot.getValue(BoardData::class.java)
+            BoardData ?: return
+            boardList.add(BoardData)
+            boardListAdapter.notifyDataSetChanged()
+            boardListAdapter.submitList(boardList)
         }
-        binding.writBtn.setOnClickListener {
-            val intent = Intent(context, BoardWriteActivity::class.java)
-            startActivity(intent)
+        override fun onChildChanged(dataSnapshot: DataSnapshot, previousChildName: String?) {
         }
-        getBoardData()
-        // Inflate the layout for this fragment
-        return binding.root
+        override fun onChildRemoved(snapshot: DataSnapshot) {}
+        override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
+        }
+        override fun onCancelled(error: DatabaseError) {}
     }
 
-    private fun getBoardData() {
-        val postListener = object : ValueEventListener {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
+        val fragmentHomeBinding = FragmentTalkBinding.bind(view)
+        binding = fragmentHomeBinding
 
-                boardList.clear()
+        boardListAdapter = BoardListAdapter(activity = requireContext())
 
-                for(dataModel in dataSnapshot.children) {
-                    Log.d(TAG, dataModel.toString())
+        fragmentHomeBinding.boardListArr.layoutManager = LinearLayoutManager(context)
+        (fragmentHomeBinding.boardListArr.layoutManager as LinearLayoutManager).reverseLayout = true
+        (fragmentHomeBinding.boardListArr.layoutManager as LinearLayoutManager).stackFromEnd = true
+        fragmentHomeBinding.boardListArr.adapter = boardListAdapter
 
-                    val item = dataModel.getValue(BoardData::class.java)
-                    boardList.add(item!!)
-                    boardKeyList.add(dataModel.key.toString())
-
-                }
-                boardKeyList.reverse()
-                boardList.reverse()
-                boardListAdapter.notifyDataSetChanged()
-                Log.d(TAG,boardList.toString())
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-
-                Log.d(TAG,"ladPost:onCancelled",error.toException())
-
-            }
+        fragmentHomeBinding.writBtn.setOnClickListener {
+            val intent = Intent(requireContext(), BoardWriteActivity::class.java)
+            startActivity(intent)
         }
-        Ref.boardRef.addValueEventListener(postListener)
+    }
+    override fun onResume() {
+        super.onResume()
+        boardList.clear()
+        Ref.boardRef.addChildEventListener(listener)
+    }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        Ref.boardRef.removeEventListener(listener)
     }
 }

@@ -17,11 +17,12 @@ class Auth {
 
         fun getTime() : String {
 
-            val currentDateTime = Calendar.getInstance().time
-            val dateFormat = SimpleDateFormat("yyyy.mm.dd HH:mm:ss", Locale.KOREA).format(currentDateTime)
+            val long_now = System.currentTimeMillis()
+            val t_date = Date(long_now)
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale("ko","KR"))
+            val str_date = dateFormat.format(t_date)
 
-            return dateFormat
+            return str_date
         }
-
     }
 }

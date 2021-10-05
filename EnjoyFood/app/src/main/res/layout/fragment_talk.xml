@@ -8,25 +8,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ListView
+        <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="70dp"
-            android:id="@+id/boardList"/>
+            android:id="@+id/boardListArr"/>
 
         <ImageView
             android:id="@+id/writBtn"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:layout_marginStart="335dp"
-            android:layout_marginTop="589dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginBottom="12dp"
+            android:layout_marginEnd="16dp"
             android:src="@drawable/writebtn"
-            app:layout_constraintBottom_toTopOf="@+id/linearLayout5"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             app:tint="@color/mainColor" />
 
         <LinearLayout

@@ -8,7 +8,7 @@ class Ref {
     companion object {
 
         private val database = Firebase.database
-
+        const val DB_ARTICLES = "board"
         val boardRef = database.getReference("board")
         val commentRef = database.getReference("comment")
     }

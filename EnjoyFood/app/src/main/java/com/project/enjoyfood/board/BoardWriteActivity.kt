@@ -1,25 +1,42 @@
 package com.project.enjoyfood.board
 
+import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.database.ChildEventListener
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
 import com.project.enjoyfood.R
 import com.project.enjoyfood.databinding.ActivityBoardWriteBinding
 import com.project.enjoyfood.firebase.Auth
 import com.project.enjoyfood.firebase.Ref
+import com.project.enjoyfood.firebase.Ref.Companion.DB_ARTICLES
+import com.project.enjoyfood.firebase.Ref.Companion.boardRef
 import java.io.ByteArrayOutputStream
 
 class BoardWriteActivity : AppCompatActivity() {
 
     private lateinit var binding : ActivityBoardWriteBinding
-
     private var isImageUpload = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,11 +50,10 @@ class BoardWriteActivity : AppCompatActivity() {
             val content = binding.contentText.text.toString()
             val uid = Auth.getUid()
             val time = Auth.getTime()
-
-            val key = Ref.boardRef.push().key.toString()
+            val key = boardRef.push().key.toString()
 
             Ref.boardRef
-                .child(key).setValue(BoardData(title, content, uid, time))
+                .child(key).setValue(BoardData(title, content, uid, time, key))
 
             Toast.makeText(this, "게시글 입력완료", Toast.LENGTH_LONG).show()
 

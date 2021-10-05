@@ -11,7 +11,7 @@ import androidx.navigation.findNavController
 import com.project.enjoyfood.R
 import com.project.enjoyfood.databinding.FragmentAccountBinding
 
-class accountFragment : Fragment() {
+class accountFragment : Fragment(R.layout.fragment_account) {
 
     private lateinit var binding : FragmentAccountBinding
 

@@ -11,7 +11,7 @@ import androidx.navigation.findNavController
 import com.project.enjoyfood.R
 import com.project.enjoyfood.databinding.FragmentSearchBinding
 
-class searchFragment : Fragment() {
+class searchFragment : Fragment(R.layout.fragment_search) {
 
     private lateinit var binding : FragmentSearchBinding
 

@@ -8,9 +8,8 @@
     <TextView
         android:id="@+id/commentText"
         android:text="comment"
-        android:textSize="20sp"
+        android:textSize="15sp"
         android:layout_margin="15dp"
-        android:textStyle="bold"
         android:textColor="@color/black"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
