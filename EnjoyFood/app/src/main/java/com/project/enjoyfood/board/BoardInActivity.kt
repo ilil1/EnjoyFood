@@ -134,7 +134,7 @@ class BoardInActivity : AppCompatActivity() {
                     .load(task.result)
                     .into(imageView)
             } else {
-                binding.imageArea.isVisible = false
+                imageView.isVisible = false
             }
         })
     }

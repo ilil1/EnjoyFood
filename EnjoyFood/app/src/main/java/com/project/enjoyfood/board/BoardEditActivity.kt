@@ -1,14 +1,18 @@
 package com.project.enjoyfood.board
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import android.widget.TableLayout
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.FragmentTransaction
 import com.bumptech.glide.Glide
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.database.DataSnapshot
@@ -21,6 +25,7 @@ import com.project.enjoyfood.databinding.ActivityBoardEditBinding
 import com.project.enjoyfood.databinding.ActivityBoardInBinding
 import com.project.enjoyfood.firebase.Auth
 import com.project.enjoyfood.firebase.Ref
+import com.project.enjoyfood.fragments.TalkFragment
 import java.io.ByteArrayOutputStream
 
 class BoardEditActivity : AppCompatActivity() {
@@ -30,7 +35,9 @@ class BoardEditActivity : AppCompatActivity() {
     private val TAG = BoardEditActivity::class.java.simpleName
     private lateinit var writerUid : String
     private var isImageUpload = false
-
+    private var selectedUri: Uri? = null
+    private lateinit var boardData: BoardData
+    @SuppressLint("ResourceType")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -54,14 +61,42 @@ class BoardEditActivity : AppCompatActivity() {
             val uid = Auth.getUid()
             val time = Auth.getTime()
 
-            Ref.boardRef
-                .child(key).setValue(BoardData(title, content, uid, time, key))
+            val ref = Ref.storageRef.child(key + ".png")
+            val uploadTask = selectedUri?.let {
+                    it1 -> ref.putFile(it1)
+            }
 
-            Toast.makeText(this,"수정완료",Toast.LENGTH_LONG).show()
+            Log.d("tg", "${uploadTask} uploadTask가 뭐냐?")
 
-            imageUpload(key)
+            if(isImageUpload == true) {
 
-            finish()
+                uploadTask?.continueWithTask {
+                    ref.downloadUrl
+                }?.addOnCompleteListener { task ->
+                    Log.e("tttttt", "onCreate 3번????", )
+                    Ref.boardRef
+                        .child(key)
+                        .setValue(BoardData(title, content, uid, time, key, task.result.toString()))
+                }
+                finish()
+            }
+            else {
+                Log.e("tttttt", "너냐?", )
+                val storageReference = Firebase.storage.reference.child(key + ".png")
+
+                storageReference.downloadUrl.addOnCompleteListener(OnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val imageurl = task.result
+                        Ref.boardRef.child(key)
+                            .setValue(BoardData(title, content, uid, time, key, imageurl.toString()))
+                    } else {
+                        val imageurl = "0"
+                        Ref.boardRef.child(key)
+                            .setValue(BoardData(title, content, uid, time, key, imageurl))
+                    }
+                })
+                finish()
+            }
         }
     }
     private fun getImageData(key : String) {
@@ -81,36 +116,12 @@ class BoardEditActivity : AppCompatActivity() {
             }
         })
     }
-    private fun imageUpload(key : String) {
-        val storage = Firebase.storage
-        val storageRef = storage.reference
-        val mountainsRef = storageRef.child(key + ".png")
-
-        val imageView = binding.imageArea
-        // Get the data from an ImageView as bytes
-        imageView.isDrawingCacheEnabled = true
-        imageView.buildDrawingCache()
-        val bitmap = (imageView.drawable as BitmapDrawable).bitmap
-        val baos = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
-        val data = baos.toByteArray()
-
-        Ref.storageRef.child(key + ".png").delete()
-        var uploadTask = mountainsRef.putBytes(data)
-
-        uploadTask.addOnFailureListener {
-            // Handle unsuccessful uploads
-
-        }.addOnSuccessListener { taskSnapshot ->
-            // taskSnapshot.metadata contains file metadata such as size, content-type, etc.
-            // ...
-        }
-    }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         if(resultCode == RESULT_OK && requestCode == 100) {
             binding.imageArea.setImageURI(data?.data)
+            selectedUri = data?.data
             Toast.makeText(this,"이미지가 업로드 되었습니다.",Toast.LENGTH_LONG).show()
         }
     }

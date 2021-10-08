@@ -1,25 +1,17 @@
 package com.project.enjoyfood.board
 
-import android.app.Activity
-import android.app.AlertDialog
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
+import android.util.Log
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.ChildEventListener
-import com.google.firebase.database.DataSnapshot
+import com.bumptech.glide.Glide
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ktx.database
@@ -31,10 +23,12 @@ import com.project.enjoyfood.databinding.ActivityBoardWriteBinding
 import com.project.enjoyfood.firebase.Auth
 import com.project.enjoyfood.firebase.Ref
 import com.project.enjoyfood.firebase.Ref.Companion.boardRef
+import com.project.enjoyfood.firebase.Ref.Companion.storageRef
 import java.io.ByteArrayOutputStream
 
 class BoardWriteActivity : AppCompatActivity() {
 
+    private var selectedUri: Uri? = null
     private lateinit var binding : ActivityBoardWriteBinding
     private var isImageUpload = false
 
@@ -51,16 +45,31 @@ class BoardWriteActivity : AppCompatActivity() {
             val time = Auth.getTime()
             val key = boardRef.push().key.toString()
 
-            Ref.boardRef
-                .child(key).setValue(BoardData(title, content, uid, time, key))
+            var imageurl = "0"
 
-            Toast.makeText(this, "게시글 입력완료", Toast.LENGTH_LONG).show()
-
-            if(isImageUpload == true) {
-                imageUpload(key)
+            val ref = storageRef.child(key + ".png")
+            val uploadTask = selectedUri?.let {
+                    it1 -> ref.putFile(it1)
             }
 
-            finish()
+            Log.d("tg", "${uploadTask} uploadTask가 뭐냐?")
+
+            if(isImageUpload == true) {
+
+                uploadTask?.continueWithTask {
+                    ref.downloadUrl
+                }?.addOnCompleteListener { task ->
+                    Log.e("tttttt", "onCreate 3번????", )
+                    Ref.boardRef
+                        .child(key)
+                        .setValue(BoardData(title, content, uid, time, key, task.result.toString()))
+                }
+                finish()
+            }
+            else {
+                Ref.boardRef.child(key).setValue(BoardData(title, content, uid, time, key, imageurl))
+                finish()
+            }
         }
         binding.imageArea.setOnClickListener {
             val gallery = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI)
@@ -68,35 +77,14 @@ class BoardWriteActivity : AppCompatActivity() {
             isImageUpload = true
         }
     }
-    private fun imageUpload(key : String) {
-//        val storage = Firebase.storage
-//        val storageRef = storage.reference
-        val mountainsRef = Ref.storageRef.child(key + ".png")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
 
-        val imageView = binding.imageArea
-        // Get the data from an ImageView as bytes
-        imageView.isDrawingCacheEnabled = true
-        imageView.buildDrawingCache()
-        val bitmap = (imageView.drawable as BitmapDrawable).bitmap
-        val baos = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
-        val data = baos.toByteArray()
-
-        var uploadTask = mountainsRef.putBytes(data)
-        uploadTask.addOnFailureListener {
-            // Handle unsuccessful uploads
-        }.addOnSuccessListener { taskSnapshot ->
-            // taskSnapshot.metadata contains file metadata such as size, content-type, etc.
-            // ...
+        if(resultCode == RESULT_OK && requestCode == 100) {
+            binding.imageArea.setImageURI(data?.data)
+            selectedUri = data?.data
+            Log.d("tg", "${data?.data} data가 뭐냐?")
+            Toast.makeText(this,"이미지가 업로드 되었습니다.",Toast.LENGTH_LONG).show()
         }
-    }
-        override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-            super.onActivityResult(requestCode, resultCode,data)
-
-            if(resultCode == RESULT_OK && requestCode == 100) {
-                binding.imageArea.setImageURI(data?.data)
-                Toast.makeText(this,"이미지가 업로드 되었습니다.",Toast.LENGTH_LONG).show()
-            }
-
     }
 }
